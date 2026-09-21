@@ -1,0 +1,67 @@
+name: taskflow
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: taskflow
+      POSTGRES_PASSWORD: taskflow
+      POSTGRES_DB: taskflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Published on 5433 so it never clashes with a local Postgres on 5432.
+    # The api/migrate services reach the database over the compose network,
+    # so this mapping is only for connecting a GUI client from the host.
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow -d taskflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/taskflow?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    # The migrations folder contains a full baseline (0_init) plus the older
+    # incremental migrations, which collide on a brand-new database. For this
+    # local stack we sync straight from schema.prisma instead. Swap this for
+    # `npx prisma migrate deploy` once the migration history is consolidated.
+    command: ["npx", "prisma", "db", "push", "--skip-generate"]
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      target: runtime
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/taskflow?schema=public
+      # Must be a real random value, not the .env.example placeholder that is
+      # currently in .env. NODE_ENV=production requires at least 32 characters.
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in the compose .env file}
+      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "fetch('http://127.0.0.1:3000/api/v1').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pgdata:
