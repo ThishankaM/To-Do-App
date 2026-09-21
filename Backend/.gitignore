@@ -2,6 +2,8 @@
 /dist
 /node_modules
 /build
+*.zip
+*.tar.gz
 
 # TypeScript build cache
 *.tsbuildinfo

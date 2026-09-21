@@ -29,11 +29,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # The migrations folder contains a full baseline (0_init) plus the older
-    # incremental migrations, which collide on a brand-new database. For this
-    # local stack we sync straight from schema.prisma instead. Swap this for
-    # `npx prisma migrate deploy` once the migration history is consolidated.
-    command: ["npx", "prisma", "db", "push", "--skip-generate"]
+    # Migration history is now clean: 0_init + add_projects_and_scheduling
+    # Safe to use migrate deploy for production-like deploys
+    command: ["npx", "prisma", "migrate", "deploy"]
     restart: "no"
 
   api:
