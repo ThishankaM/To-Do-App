@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: taskflow
       POSTGRES_PASSWORD: taskflow
-      POSTGRES_DB: taskflow
+      POSTGRES_DB: todo_db_new
     volumes:
       - pgdata:/var/lib/postgresql/data
     # Published on 5433 so it never clashes with a local Postgres on 5432.
@@ -25,7 +25,7 @@ services:
       context: .
       target: migrate
     environment:
-      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/taskflow?schema=public
+      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/todo_db_new?schema=public
     depends_on:
       db:
         condition: service_healthy
@@ -43,7 +43,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: "3000"
-      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/taskflow?schema=public
+      DATABASE_URL: postgresql://taskflow:taskflow@db:5432/todo_db_new?schema=public
       # Must be a real random value, not the .env.example placeholder that is
       # currently in .env. NODE_ENV=production requires at least 32 characters.
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in the compose .env file}
