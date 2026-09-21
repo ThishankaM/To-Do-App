@@ -13,6 +13,15 @@ import type { Project, CreateProjectRequest, ProjectStatus } from "@/types/proje
 import { useProjects } from "@/hooks/use-projects";
 import { LoadingState } from "@/components/states/loading-state";
 
+function isStatusFilter(value: string): value is ProjectStatus | "all" {
+  return (
+    value === "all" ||
+    value === "active" ||
+    value === "completed" ||
+    value === "archived"
+  );
+}
+
 export default function ProjectsView() {
   const { onUpdateParams } = useOutletContext<WorkspaceViewContext>();
   const {
@@ -90,7 +99,9 @@ export default function ProjectsView() {
             <Select
               value={statusFilter}
               items={{ all: "All", active: "Active", completed: "Completed", archived: "Archived" }}
-              onValueChange={(v) => setStatusFilter(v as any)}
+              onValueChange={(v) => {
+                if (isStatusFilter(v)) setStatusFilter(v);
+              }}
             >
               <SelectTrigger className="w-32">
                 <SelectValue />

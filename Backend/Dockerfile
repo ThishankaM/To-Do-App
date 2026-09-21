@@ -10,7 +10,12 @@ RUN apt-get update \
 # ---- deps: full install, dev deps included (needed to compile) ----
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci
+# The lock file is written by npm 11 on the host, which tolerates a peer
+# conflict between @nestjs/cli (typescript ~6) and tsconfck (typescript ^5).
+# The npm 10 that ships with node:22 does not, so it tries to add a nested
+# typescript@5.9.3 that isn't in the lock. --legacy-peer-deps installs exactly
+# what the lock records. Regenerate the lock with npm 10 to drop this flag.
+RUN npm ci --legacy-peer-deps
 
 # ---- build: generate the Prisma client, then compile the Nest app ----
 FROM deps AS build
@@ -29,7 +34,7 @@ CMD ["npx", "prisma", "migrate", "deploy"]
 FROM base AS runtime
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 # The Prisma client is generated at build time, not published to npm,
 # so it has to be copied out of the build stage.
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma

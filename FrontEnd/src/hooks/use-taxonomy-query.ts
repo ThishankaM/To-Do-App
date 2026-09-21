@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryApi, tagApi } from "@/services/taxonomy-api";
+import { errorMessage } from "@/lib/error-message";
 
 export function useTaxonomyQuery(enabled = true) {
   const queryClient = useQueryClient();
@@ -78,48 +79,66 @@ export function useTaxonomyQuery(enabled = true) {
       try {
         await createCategory.mutateAsync(name);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to create category"),
+        };
       }
     },
     updateCategory: async (id: string, name: string) => {
       try {
         await updateCategory.mutateAsync({ id, name });
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to update category"),
+        };
       }
     },
     deleteCategory: async (id: string) => {
       try {
         await deleteCategory.mutateAsync(id);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to delete category"),
+        };
       }
     },
     createTag: async (name: string) => {
       try {
         await createTag.mutateAsync(name);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to create tag"),
+        };
       }
     },
     updateTag: async (id: string, name: string) => {
       try {
         await updateTag.mutateAsync({ id, name });
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to update tag"),
+        };
       }
     },
     deleteTag: async (id: string) => {
       try {
         await deleteTag.mutateAsync(id);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to delete tag"),
+        };
       }
     },
   };

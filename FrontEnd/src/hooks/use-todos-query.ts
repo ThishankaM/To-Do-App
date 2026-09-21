@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { todoApi } from "@/services/todo-api";
+import { errorMessage } from "@/lib/error-message";
 import type { TodoQueryParams, PaginatedResponse } from "@/types/api";
 import type { CreateTodoRequest, Todo, UpdateTodoRequest } from "@/types/todo";
 
 function enforceLocalInvariant(payload: Partial<CreateTodoRequest>): Partial<CreateTodoRequest> {
-  let { status, completed, progress } = payload;
+  const { status, completed, progress } = payload;
   if (completed === true || status === "done") {
     return { ...payload, status: "done", completed: true, progress: 100 };
   }
@@ -107,24 +108,24 @@ export function useTodosQuery(enabled = true) {
       try {
         const data = await createMutation.mutateAsync(payload);
         return { ok: true as const, data };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed to create" };
+      } catch (e) {
+        return { ok: false as const, error: errorMessage(e, "Failed to create") };
       }
     },
     updateTodo: async (id: string, payload: UpdateTodoRequest) => {
       try {
         const data = await updateMutation.mutateAsync({ id, payload });
         return { ok: true as const, data };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed to update" };
+      } catch (e) {
+        return { ok: false as const, error: errorMessage(e, "Failed to update") };
       }
     },
     deleteTodo: async (id: string) => {
       try {
         await deleteMutation.mutateAsync(id);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed to delete" };
+      } catch (e) {
+        return { ok: false as const, error: errorMessage(e, "Failed to delete") };
       }
     },
 

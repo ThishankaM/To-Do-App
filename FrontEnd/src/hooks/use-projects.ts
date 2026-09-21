@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectApi } from "@/services/project-api";
+import { errorMessage } from "@/lib/error-message";
 import type { CreateProjectRequest, UpdateProjectRequest } from "@/types/project";
 
 export function useProjects(enabled = true) {
@@ -45,24 +46,33 @@ export function useProjects(enabled = true) {
       try {
         const data = await createMutation.mutateAsync(payload);
         return { ok: true as const, data };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed" };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to create project"),
+        };
       }
     },
     updateProject: async (id: string, payload: UpdateProjectRequest) => {
       try {
         const data = await updateMutation.mutateAsync({ id, payload });
         return { ok: true as const, data };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed" };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to update project"),
+        };
       }
     },
     deleteProject: async (id: string) => {
       try {
         await deleteMutation.mutateAsync(id);
         return { ok: true as const };
-      } catch (e: any) {
-        return { ok: false as const, error: e.message ?? "Failed" };
+      } catch (e) {
+        return {
+          ok: false as const,
+          error: errorMessage(e, "Failed to delete project"),
+        };
       }
     },
 
