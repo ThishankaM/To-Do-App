@@ -20,7 +20,10 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-function isTodayTask(dueDate: string | null, scheduledStart: string | null): boolean {
+function isTodayTask(
+  dueDate: string | null,
+  scheduledStart: string | null,
+): boolean {
   const today = new Date();
   if (scheduledStart) {
     try {
@@ -60,8 +63,12 @@ export default function MyDayView() {
       .filter((todo) => isTodayTask(todo.dueDate, todo.scheduledStart))
       .sort((a, b) => {
         // scheduled time first
-        const aTime = a.scheduledStart ? parseISO(a.scheduledStart).getTime() : Infinity;
-        const bTime = b.scheduledStart ? parseISO(b.scheduledStart).getTime() : Infinity;
+        const aTime = a.scheduledStart
+          ? parseISO(a.scheduledStart).getTime()
+          : Infinity;
+        const bTime = b.scheduledStart
+          ? parseISO(b.scheduledStart).getTime()
+          : Infinity;
         if (aTime !== bTime) return aTime - bTime;
         return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
       });
@@ -73,14 +80,14 @@ export default function MyDayView() {
         (todo) =>
           todo.dueDate &&
           !todo.completed &&
-          isBefore(parseISO(todo.dueDate), startOfToday())
+          isBefore(parseISO(todo.dueDate), startOfToday()),
       ).length,
-    [todos]
+    [todos],
   );
 
   const priorityTasks = useMemo(
     () => todos.filter((todo) => todo.priority === "HIGH" && !todo.completed),
-    [todos]
+    [todos],
   );
 
   const completedToday = todayTasks.filter((todo) => todo.completed).length;
@@ -135,12 +142,16 @@ export default function MyDayView() {
             {getGreeting()}, {user?.name ?? "there"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {todayTasks.length} tasks for today • {priorityTasks.length} high priority • {overdueCount} overdue
+            {todayTasks.length} tasks for today • {priorityTasks.length} high
+            priority • {overdueCount} overdue
           </p>
           {projectSummary.length > 0 && (
             <div className="mt-2 flex gap-2">
               {projectSummary.map(([name, count]) => (
-                <span key={name} className="rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary">
+                <span
+                  key={name}
+                  className="rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary"
+                >
                   {name}: {count}
                 </span>
               ))}
